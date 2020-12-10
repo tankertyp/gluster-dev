@@ -132,6 +132,7 @@ gf_mem_acct_enabled(void)
     return x->ctx && x->ctx->mem_acct_enable;
 }
 
+// __gf_calloc()
 void *
 __gf_calloc(size_t nmemb, size_t size, uint32_t type, const char *typestr)
 {
@@ -170,6 +171,7 @@ __gf_malloc(size_t size, uint32_t type, const char *typestr)
 
     xl = THIS;
 
+    // total_size = size + 头部大小 + 尾部大小
     tot_size = size + GF_MEM_HEADER_SIZE + GF_MEM_TRAILER_SIZE;
 
     ptr = malloc(tot_size);
@@ -378,6 +380,7 @@ mem_pool_new_fn(glusterfs_ctx_t *ctx, unsigned long sizeof_type,
     return new;
 }
 
+// 销毁内存池
 void
 mem_pool_destroy(struct mem_pool *pool)
 {
@@ -415,12 +418,14 @@ static pthread_mutex_t init_mutex = PTHREAD_MUTEX_INITIALIZER;
 static unsigned int init_count = 0;
 static pthread_t sweeper_tid;
 
+// 垃圾回收
 static bool
 collect_garbage(sweep_state_t *state, per_thread_pool_list_t *pool_list)
 {
     unsigned int i;
     per_thread_pool_t *pt_pool;
 
+    // pool_list
     (void)pthread_spin_lock(&pool_list->lock);
 
     for (i = 0; i < NPOOLS; ++i) {
@@ -441,6 +446,7 @@ collect_garbage(sweep_state_t *state, per_thread_pool_list_t *pool_list)
     return false;
 }
 
+// 释放对象链表
 static void
 free_obj_list(pooled_obj_hdr_t *victim)
 {
@@ -452,6 +458,7 @@ free_obj_list(pooled_obj_hdr_t *victim)
         victim = next;
     }
 }
+
 
 static void *
 pool_sweeper(void *arg)
@@ -499,6 +506,7 @@ pool_sweeper(void *arg)
     return NULL;
 }
 
+// 内存池线程析构
 void
 mem_pool_thread_destructor(per_thread_pool_list_t *pool_list)
 {
@@ -782,6 +790,7 @@ mem_get_pool_list(void)
 
     return pool_list;
 }
+
 
 static pooled_obj_hdr_t *
 mem_get_from_pool(struct mem_pool *mem_pool)

@@ -27,6 +27,7 @@ gf_fd_chain_fd_entries(fdentry_t *entries, uint32_t startidx, uint32_t endcount)
     uint32_t i = 0;
 
     if (!entries) {
+        // gf消息调用函数
         gf_msg_callingfn("fd", GF_LOG_WARNING, EINVAL, LG_MSG_INVALID_ARG,
                          "!entries");
         return -1;
@@ -44,6 +45,7 @@ gf_fd_chain_fd_entries(fdentry_t *entries, uint32_t startidx, uint32_t endcount)
     return 0;
 }
 
+// 扩展文件描述符表
 static int
 gf_fd_fdtable_expand(fdtable_t *fdtable, uint32_t nr)
 {
@@ -91,6 +93,7 @@ out:
     return ret;
 }
 
+// 分配文件描述符表
 fdtable_t *
 gf_fd_fdtable_alloc(void)
 {
@@ -132,9 +135,11 @@ out:
     return fdentries;
 }
 
+// 获取全部的文件描述符
 fdentry_t *
 gf_fd_fdtable_get_all_fds(fdtable_t *fdtable, uint32_t *count)
 {
+    // fdentry_t
     fdentry_t *entries = NULL;
 
     if (fdtable) {
@@ -166,7 +171,7 @@ __gf_fd_fdtable_copy_all_fds(fdtable_t *fdtable, uint32_t *count)
         goto out;
     }
 
-    *count = fdtable->max_fds;
+    *count = fdtable->max_fds; 
 
     for (i = 0; i < fdtable->max_fds; i++) {
         if (fdtable->fdentries[i].fd != NULL) {
@@ -178,6 +183,7 @@ out:
     return fdentries;
 }
 
+// 复制所有文件描述符
 fdentry_t *
 gf_fd_fdtable_copy_all_fds(fdtable_t *fdtable, uint32_t *count)
 {
@@ -194,6 +200,7 @@ gf_fd_fdtable_copy_all_fds(fdtable_t *fdtable, uint32_t *count)
     return entries;
 }
 
+// 销毁文件描述符表
 void
 gf_fd_fdtable_destroy(fdtable_t *fdtable)
 {

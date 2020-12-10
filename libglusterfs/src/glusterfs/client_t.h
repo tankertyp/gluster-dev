@@ -42,7 +42,7 @@ typedef struct _client {
     gf_atomic_t count;
     xlator_t *bound_xl;
     xlator_t *this;
-    int tbl_index;
+    int tbl_index;  // tbl索引号
     char *client_uid;
     char *client_name;
     struct {

@@ -11,6 +11,7 @@
 #ifndef _LLIST_H
 #define _LLIST_H
 
+// 双向链表
 struct list_head {
     struct list_head *next;
     struct list_head *prev;
@@ -21,6 +22,7 @@ struct list_head {
         (head)->next = (head)->prev = head;                                    \
     } while (0)
 
+// 将一个新节点插入在head之后
 static inline void
 list_add(struct list_head *new, struct list_head *head)
 {
@@ -31,6 +33,7 @@ list_add(struct list_head *new, struct list_head *head)
     new->next->prev = new;
 }
 
+// 将一个新节点插入在head之前
 static inline void
 list_add_tail(struct list_head *new, struct list_head *head)
 {
@@ -60,20 +63,21 @@ list_add_order(struct list_head *new, struct list_head *head,
         /* Iterate the list in the reverse order. This will have
            better efficiency if the elements are inserted in the
            ascending order */
-        pos = pos->prev;
+        pos = pos->prev;    // 逆向遍历
     }
 
     list_add(new, pos);
 }
 
+// 删除链表中的一个节点
 static inline void
 list_del(struct list_head *old)
 {
     old->prev->next = old->next;
     old->next->prev = old->prev;
 
-    old->next = (void *)0xbabebabe;
-    old->prev = (void *)0xcafecafe;
+    old->next = (void *)0xbabebabe; // old->next = NULL;
+    old->prev = (void *)0xcafecafe; // old->prev = NULL;
 }
 
 static inline void

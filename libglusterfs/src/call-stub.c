@@ -205,6 +205,7 @@ fop_access_stub(call_frame_t *frame, fop_access_t fn, loc_t *loc, int32_t mask,
 
     GF_VALIDATE_OR_GOTO("call-stub", loc, out);
 
+    // 新建stub
     stub = stub_new(frame, 1, GF_FOP_ACCESS);
     GF_VALIDATE_OR_GOTO("call-stub", stub, out);
 
@@ -333,6 +334,7 @@ out:
     return stub;
 }
 
+// unlink
 call_stub_t *
 fop_unlink_stub(call_frame_t *frame, fop_unlink_t fn, loc_t *loc, int xflag,
                 dict_t *xdata)
@@ -439,6 +441,7 @@ out:
     return stub;
 }
 
+// 重命名
 call_stub_t *
 fop_rename_stub(call_frame_t *frame, fop_rename_t fn, loc_t *oldloc,
                 loc_t *newloc, dict_t *xdata)
@@ -512,6 +515,7 @@ out:
     return stub;
 }
 
+// 创建stub
 call_stub_t *
 fop_create_stub(call_frame_t *frame, fop_create_t fn, loc_t *loc, int32_t flags,
                 mode_t mode, mode_t umask, fd_t *fd, dict_t *xdata)

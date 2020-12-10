@@ -286,10 +286,13 @@ static struct argp argp = {gf_options, parse_opts, argp_doc, gf_doc};
 
 int
 glusterfs_pidfile_cleanup(glusterfs_ctx_t *ctx);
+
 int
 glusterfs_volumes_init(glusterfs_ctx_t *ctx);
+
 int
 glusterfs_mgmt_init(glusterfs_ctx_t *ctx);
+
 int
 glusterfs_listener_init(glusterfs_ctx_t *ctx);
 
@@ -545,6 +548,7 @@ err:
     return ret;
 }
 
+// 创建融合挂载
 int
 create_fuse_mount(glusterfs_ctx_t *ctx)
 {
@@ -587,6 +591,7 @@ create_fuse_mount(glusterfs_ctx_t *ctx)
     if (ret)
         goto err;
 
+    // 融合挂载选项
     if (cmd_args->fuse_mountopts) {
         ret = dict_set_static_ptr(master->options, ZR_FUSE_MOUNTOPTS,
                                   cmd_args->fuse_mountopts);
@@ -1398,6 +1403,7 @@ should_call_fini(glusterfs_ctx_t *ctx, xlator_t *trav)
     return _gf_false;
 }
 
+// 清理并退出
 void
 cleanup_and_exit(int signum)
 {
@@ -1536,6 +1542,7 @@ emancipate(glusterfs_ctx_t *ctx, int ret)
     }
 }
 
+// 获取处理模式
 static uint8_t
 gf_get_process_mode(char *exec_name)
 {
@@ -1715,6 +1722,7 @@ out:
     return ret;
 }
 
+// 日志初始化
 static int
 logging_init(glusterfs_ctx_t *ctx, const char *progpath)
 {
@@ -1933,7 +1941,7 @@ print_netgroups_file(const char *netgroups_file)
         goto out;
     }
 
-    /* Parse the file */
+    /* Parse the file 解析文件*/
     file = ng_file_parse(netgroups_file);
     if (!file) {
         ret = 1; /* This means we failed to parse */
@@ -2539,6 +2547,7 @@ out:
     return ret;
 }
 
+// 卷初始化
 int
 glusterfs_volumes_init(glusterfs_ctx_t *ctx)
 {
@@ -2590,7 +2599,9 @@ main(int argc, char *argv[])
     };
     cmd_args_t *cmd = NULL;
 
+    // 检查并设置内存
     gf_check_and_set_mem_acct(argc, argv);
+
 
     ctx = glusterfs_ctx_new();
     if (!ctx) {
@@ -2651,7 +2662,8 @@ main(int argc, char *argv[])
         ret = print_exports_file(cmd->print_exports);
         goto out;
     }
-
+    
+    // 日志初始化
     ret = logging_init(ctx, argv[0]);
     if (ret)
         goto out;
@@ -2687,11 +2699,13 @@ main(int argc, char *argv[])
 
     gf_proc_dump_init();
 
+    // 创建融合挂载
     ret = create_fuse_mount(ctx);
     if (ret)
         goto out;
 
-    ret = daemonize(ctx);
+    // 后台化
+    ret = daemonize(ctx);  
     if (ret)
         goto out;
 
@@ -2700,6 +2714,7 @@ main(int argc, char *argv[])
      * the parent, but we want to do it as soon as possible after that in
      * case something else depends on pool allocations.
      */
+    // 内存池初始化
     mem_pools_init();
 
     ret = gf_async_init(ctx);
@@ -2725,10 +2740,12 @@ main(int argc, char *argv[])
         goto out;
     }
 
+    // 卷初始化
     ret = glusterfs_volumes_init(ctx);
     if (ret)
         goto out;
-
+    
+    // 事件分发
     ret = gf_event_dispatch(ctx->event_pool);
 
 out:

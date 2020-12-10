@@ -35,6 +35,7 @@ typedef void (*event_handler_t)(int fd, int idx, int gen, void *data,
 /* See rpcsvc.h to check why. */
 GF_STATIC_ASSERT(EVENT_MAX_THREADS % __BITS_PER_LONG == 0);
 
+// 事件池
 struct event_pool {
     struct event_ops *ops;
 

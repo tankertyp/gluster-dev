@@ -152,6 +152,7 @@ event_slot_alloc(struct event_pool *event_pool, int fd,
 {
     int idx = -1;
 
+    // pthread_mutex_lock
     pthread_mutex_lock(&event_pool->mutex);
     {
         idx = __event_slot_alloc(event_pool, fd, notify_poller_death, slot);
@@ -170,8 +171,8 @@ __event_slot_dealloc(struct event_pool *event_pool, int idx)
     struct event_slot_epoll *slot = NULL;
     int fd = -1;
 
-    table_idx = idx / EVENT_EPOLL_SLOTS;
-    offset = idx % EVENT_EPOLL_SLOTS;
+    table_idx = idx / EVENT_EPOLL_SLOTS;    // 表索引号
+    offset = idx % EVENT_EPOLL_SLOTS;   // 偏移
 
     table = event_pool->ereg[table_idx];
     if (!table)
@@ -282,6 +283,7 @@ done:
     return;
 }
 
+
 static struct event_pool *
 event_pool_new_epoll(int count, int eventthreadcount)
 {
@@ -293,7 +295,7 @@ event_pool_new_epoll(int count, int eventthreadcount)
     if (!event_pool)
         goto out;
 
-    epfd = epoll_create(count);
+    epfd = epoll_create(count); // 创建一个 epoll fd
 
     if (epfd == -1) {
         gf_smsg("epoll", GF_LOG_ERROR, errno, LG_MSG_EPOLL_FD_CREATE_FAILED,
@@ -353,6 +355,7 @@ __slot_update_events(struct event_slot_epoll *slot, int poll_in, int poll_out)
     }
 }
 
+// 注册epoll
 int
 event_register_epoll(struct event_pool *event_pool, int fd,
                      event_handler_t handler, void *data, int poll_in,
@@ -484,6 +487,7 @@ out:
     return ret;
 }
 
+// 注销epoll
 static int
 event_unregister_epoll(struct event_pool *event_pool, int fd, int idx_hint)
 {

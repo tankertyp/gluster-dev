@@ -258,6 +258,7 @@ gf_async_signal_restore(void)
     }
 }
 
+
 static void
 gf_async_signal_flush(void)
 {
@@ -279,6 +280,7 @@ gf_async_thread_create(pthread_t *thread, int32_t id, void *data)
 {
     int32_t ret;
 
+    // 创建线程
     ret = gf_thread_create(thread, NULL, gf_async_worker, data,
                            GF_ASYNC_THREAD_NAME "%u", id);
     if (caa_unlikely(ret < 0)) {

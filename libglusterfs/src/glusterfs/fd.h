@@ -36,6 +36,7 @@ struct _fd_ctx {
     };
 };
 
+// 文件描述符
 struct _fd {
     uint64_t pid;
     int32_t flags;

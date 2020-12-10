@@ -21,11 +21,11 @@
 struct trienode {
     char id;
     char eow;
-    int depth;
+    int depth;  // 当前节点的深度
     void *data;
     struct trie *trie;
-    struct trienode *parent;
-    struct trienode *subnodes[255];
+    struct trienode *parent;    // 父节点
+    struct trienode *subnodes[255]; // 子节点
 };
 
 struct trie {

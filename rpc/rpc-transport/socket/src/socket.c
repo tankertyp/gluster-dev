@@ -240,6 +240,7 @@ ssl_dump_error_stack(const char *caller)
     }
 }
 
+// ssl do
 static int
 ssl_do(rpc_transport_t *this, void *buf, size_t len, SSL_trinary_func *func)
 {
@@ -405,6 +406,7 @@ done:
     return ret;
 }
 
+// ssl 设置连接后缀
 static char *
 ssl_setup_connection_postfix(rpc_transport_t *this)
 {
@@ -448,6 +450,7 @@ ssl_error:
     return NULL;
 }
 
+// 完成连接
 static int
 ssl_complete_connection(rpc_transport_t *this)
 {
@@ -587,6 +590,7 @@ __socket_ssl_read(rpc_transport_t *this, void *buf, size_t count)
     return ret;
 }
 
+// scoket 读取缓存
 static int
 __socket_cached_read(rpc_transport_t *this, struct iovec *opvector, int opcount)
 {

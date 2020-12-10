@@ -158,6 +158,7 @@ __gf_default_realloc(void *oldptr, size_t size)
 
 #define GF_FREE(free_ptr) __gf_free(free_ptr)
 
+
 static inline char *
 gf_strndup(const char *src, size_t len)
 {

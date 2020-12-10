@@ -39,6 +39,7 @@ gf_client_chain_client_entries(cliententry_t *entries, uint32_t startidx,
     return 0;
 }
 
+// 扩展client表
 static int
 gf_client_clienttable_expand(clienttable_t *clienttable, uint32_t nr)
 {
@@ -53,9 +54,10 @@ gf_client_clienttable_expand(clienttable_t *clienttable, uint32_t nr)
         goto out;
     }
 
-    oldclients = clienttable->cliententries;
+    oldclients = clienttable->cliententries;   
     oldmax_clients = clienttable->max_clients;
 
+    // GF_CALOC()分配client entries
     clienttable->cliententries = GF_CALLOC(nr, sizeof(cliententry_t),
                                            gf_common_mt_cliententry_t);
     if (!clienttable->cliententries) {
@@ -84,6 +86,7 @@ out:
     return ret;
 }
 
+// 分配client表
 clienttable_t *
 gf_clienttable_alloc(void)
 {
@@ -236,6 +239,7 @@ unlock:
     return client;
 }
 
+// put
 void
 gf_client_put(client_t *client, gf_boolean_t *detached)
 {
@@ -269,6 +273,7 @@ out:
     return;
 }
 
+// 引用计数
 client_t *
 gf_client_ref(client_t *client)
 {
@@ -278,7 +283,7 @@ gf_client_ref(client_t *client)
         return NULL;
     }
 
-    GF_ATOMIC_INC(client->count);
+    GF_ATOMIC_INC(client->count);   // client->count
     gf_msg_callingfn("client_t", GF_LOG_DEBUG, 0, LG_MSG_REF_COUNT,
                      "%s: "
                      "ref-count %" GF_PRI_ATOMIC,
@@ -300,6 +305,7 @@ gf_client_destroy_recursive(xlator_t *xl, client_t *client)
     }
 }
 
+// 销毁client
 static void
 client_destroy(client_t *client)
 {
@@ -345,6 +351,7 @@ out:
     return;
 }
 
+
 static int
 gf_client_disconnect_recursive(xlator_t *xl, client_t *client)
 {
@@ -362,6 +369,7 @@ gf_client_disconnect_recursive(xlator_t *xl, client_t *client)
     return ret;
 }
 
+// 断开连接
 int
 gf_client_disconnect(client_t *client)
 {
@@ -716,6 +724,7 @@ gf_client_dump_inodes_to_dict(xlator_t *this, dict_t *dict)
     GF_VALIDATE_OR_GOTO(THIS->name, this, out);
     GF_VALIDATE_OR_GOTO(this->name, dict, out);
 
+    // client表
     clienttable = this->ctx->clienttable;
 
     if (!clienttable)

@@ -138,6 +138,7 @@ inode_table_prune(inode_table_t *table);
 void
 fd_dump(struct list_head *head, char *prefix);
 
+// 对dentry做哈希
 static int
 hash_dentry(inode_t *parent, const char *name, int mod)
 {
@@ -184,6 +185,7 @@ __dentry_unhash(dentry_t *dentry)
     list_del_init(&dentry->hash);
 }
 
+// 销毁dentry
 static void
 dentry_destroy(dentry_t *dentry)
 {
@@ -230,7 +232,7 @@ __foreach_ancestor_dentry(dentry_t *dentry,
         return 0;
     }
 
-    ret = per_dentry_fn(dentry, data);
+    ret = per_dentry_fn(dentry, data); 
     if (ret) {
         gf_smsg(THIS->name, GF_LOG_WARNING, 0, LG_MSG_PER_DENTRY_FAILED,
                 "ret=%d", ret, NULL);
@@ -246,6 +248,7 @@ __foreach_ancestor_dentry(dentry_t *dentry,
 
     list_for_each_entry(each, &parent->dentry_list, inode_list)
     {
+        // recursive
         ret = __foreach_ancestor_dentry(each, per_dentry_fn, data);
         if (ret)
             goto out;
@@ -254,6 +257,7 @@ out:
     return ret;
 }
 
+// 检查环
 static int
 __check_cycle(dentry_t *a_dentry, void *data)
 {
@@ -303,6 +307,7 @@ __inode_hash(inode_t *inode, const int hash)
     list_add(&inode->hash, &table->inode_hash[hash]);
 }
 
+// 给定inode找到对应dentry
 static dentry_t *
 __dentry_search_for_inode(inode_t *inode, uuid_t pargfid, const char *name)
 {
@@ -318,7 +323,7 @@ __dentry_search_for_inode(inode_t *inode, uuid_t pargfid, const char *name)
     list_for_each_entry(tmp, &inode->dentry_list, inode_list)
     {
         if ((gf_uuid_compare(tmp->parent->gfid, pargfid) == 0) &&
-            !strcmp(tmp->name, name)) {
+            !strcmp(tmp->name, name)) { // tmp->name == name
             dentry = tmp;
             break;
         }
@@ -351,7 +356,7 @@ __inode_ctx_free(inode_t *inode)
         }
     }
 
-    GF_FREE(inode->_ctx);
+    GF_FREE(inode->_ctx);   // GF_FREE()
     inode->_ctx = NULL;
 
 noctx:
@@ -367,6 +372,7 @@ __inode_destroy(inode_t *inode)
     //  memset (inode, 0xb, sizeof (*inode));
     mem_put(inode);
 }
+
 
 void
 inode_ctx_merge(fd_t *fd, inode_t *inode, inode_t *linked_inode)
@@ -422,6 +428,7 @@ __inode_passivate(inode_t *inode)
             dentry_destroy(__dentry_unset(dentry));
     }
 }
+
 
 static void
 __inode_retire(inode_t *inode)
@@ -534,6 +541,7 @@ __inode_unref(inode_t *inode, bool clear)
 
     return inode;
 }
+
 
 static inode_t *
 __inode_ref(inode_t *inode, bool is_invalidate)
@@ -808,6 +816,7 @@ inode_grep(inode_table_t *table, inode_t *parent, const char *name)
     return inode;
 }
 
+// 解析
 inode_t *
 inode_resolve(inode_table_t *table, char *path)
 {
@@ -868,6 +877,7 @@ inode_grep_for_gfid(inode_table_t *table, inode_t *parent, const char *name,
         return ret;
     }
 
+    // 计算dentry的哈希值
     int hash = hash_dentry(parent, name, table->dentry_hashsize);
 
     pthread_mutex_lock(&table->lock);
@@ -1095,6 +1105,7 @@ inode_link(inode_t *inode, inode_t *parent, const char *name, struct iatt *iatt)
     return linked_inode;
 }
 
+// 查找
 int
 inode_lookup(inode_t *inode)
 {
@@ -1128,7 +1139,7 @@ inode_ref_reduce_by_n(inode_t *inode, uint64_t nref)
     }
     pthread_mutex_unlock(&table->lock);
 
-    inode_table_prune(table);
+    inode_table_prune(table);   // 剪枝???
 
     return 0;
 }
@@ -1561,9 +1572,9 @@ inode_table_prune(inode_table_t *table)
         if (!table->lru_limit)
             goto purge_list;
 
-        lru_size = table->lru_size;
+        lru_size = table->lru_size; // lru缓存大小
         while (lru_size > (table->lru_limit)) {
-            if (list_empty(&table->lru)) {
+            if (list_empty(&table->lru)) {  // 空inode lru链表被发现
                 gf_msg_callingfn(THIS->name, GF_LOG_WARNING, 0,
                                  LG_MSG_INVALID_INODE_LIST,
                                  "Empty inode lru list found"
@@ -1577,7 +1588,9 @@ inode_table_prune(inode_table_t *table)
             /* The logic of invalidation is required only if invalidator_fn
                is present */
             if (table->invalidator_fn) {
-                /* check for valid inode with 'nlookup' */
+                /* check for valid inode with 'nlookup' 
+                    使用'nlookup'检查有效的inode
+                */
                 nlookup = GF_ATOMIC_GET(entry->nlookup);
                 if (nlookup) {
                     if (entry->invalidate_sent) {
@@ -1591,7 +1604,7 @@ inode_table_prune(inode_table_t *table)
             }
 
             table->lru_size--;
-            __inode_retire(entry);
+            __inode_retire(entry); 
             ret++;
         }
 
@@ -1623,7 +1636,7 @@ inode_table_prune(inode_table_t *table)
     /* Just so that if purge list is handled too, then clear it off */
     list_for_each_entry_safe(del, tmp, &purge, list)
     {
-        list_del_init(&del->list);
+        list_del_init(&del->list); 
         inode_forget_atomic(del, 0);
         __inode_destroy(del);
     }
@@ -1631,6 +1644,7 @@ inode_table_prune(inode_table_t *table)
     return ret;
 }
 
+// table初始化根节点
 static void
 __inode_table_init_root(inode_table_t *table)
 {
@@ -1644,6 +1658,7 @@ __inode_table_init_root(inode_table_t *table)
 
     root = inode_create(table);
 
+    // table->lru -----> root->list
     list_add(&root->list, &table->lru);
     table->lru_size++;
 
@@ -1778,8 +1793,8 @@ inode_table_ctx_free(inode_table_t *table)
     int ret = 0;
     inode_t *del = NULL;
     inode_t *tmp = NULL;
-    int purge_count = 0;
-    int lru_count = 0;
+    int purge_count = 0;    // 
+    int lru_count = 0;  //
     int active_count = 0;
     xlator_t *this = NULL;
     int itable_size = 0;
@@ -1836,6 +1851,7 @@ inode_table_ctx_free(inode_table_t *table)
     return ret;
 }
 
+
 void
 inode_table_destroy_all(glusterfs_ctx_t *ctx)
 {
@@ -1855,7 +1871,7 @@ inode_table_destroy_all(glusterfs_ctx_t *ctx)
         inode_table = tree->itable;
         tree->itable = NULL;
         if (inode_table)
-            inode_table_destroy(inode_table);
+            inode_table_destroy(inode_table);   // 销毁inode_table
     }
 out:
     return;
